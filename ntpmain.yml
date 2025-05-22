@@ -1,0 +1,26 @@
+---
+- name: Установка chrony
+  dnf:
+    name: chrony
+    state: present
+
+- name: Настройка конфигурации
+  template:
+    src: ntp.conf.j2
+    dest: /etc/chrony.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart chronyd
+
+- name: Запуск и включение службы
+  systemd:
+    name: chronyd
+    state: started
+    enabled: yes
+
+handlers:
+  - name: restart chronyd
+    systemd:
+      name: chronyd
+      state: restarted

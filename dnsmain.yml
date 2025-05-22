@@ -1,0 +1,45 @@
+---
+- name: Установка BIND и утилит
+  dnf:
+    name: [bind, bind-utils]
+    state: present
+
+- name: Настройка конфигурации named
+  template:
+    src: named.conf.j2
+    dest: /etc/named.conf
+    owner: root
+    group: named
+    mode: 0640
+  notify: restart named
+
+- name: Создание файла зоны
+  template:
+    src: zone.example.com.j2
+    dest: /var/named/{{ dns_domain }}.zone
+    owner: root
+    group: named
+    mode: 0640
+  notify: reload named
+
+- name: Запуск и включение службы
+  systemd:
+    name: named
+    state: started
+    enabled: yes
+
+- name: Проверка конфигурации
+  command: named-checkconf
+  changed_when: false
+
+handlers:
+  - name: restart named
+    systemd:
+      name: named
+      state: restarted
+      enabled: yes
+
+  - name: reload named
+    systemd:
+      name: named
+      state: reloaded

@@ -1,0 +1,21 @@
+options {
+    listen-on port 53 { any; };
+    directory       "/var/named";
+    dump-file       "/var/named/data/cache_dump.db";
+    statistics-file "/var/named/data/named_stats.txt";
+    memstatistics-file "/var/named/data/named_mem_stats.txt";
+    allow-query     { any; };
+    recursion yes;
+
+    forwarders {
+        {% for server in upstream_dns_servers %}
+        {{ server }};
+        {% endfor %}
+    };
+};
+
+zone "{{ dns_domain }}" IN {
+    type master;
+    file "{{ dns_domain }}.zone";
+    allow-update { none; };
+};
