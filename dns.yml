@@ -1,5 +1,5 @@
 ---
-- name: Configure and deploy DNS server and clients
+- name: Настройка DNS-сервера и клиентов
   hosts: all
   become: yes
   vars:
@@ -9,13 +9,13 @@
       - { name: "ns1", ip: "192.168.1.2", type: "A" }
 
   tasks:
-    - name: Install BIND packages
+    - name: Установка пакетов BIND
       dnf:
         name: [bind, bind-utils]
         state: present
       when: "'dns_servers' in group_names"
 
-    - name: Configure named.conf
+    - name: Настройка named.conf
       template:
         src: "/etc/ansible/roles/dns/templates/named.conf.j2"
         dest: "/etc/named.conf"
@@ -25,19 +25,19 @@
       notify: restart named
       when: "'dns_servers' in group_names"
       
-    - name: Create zone file
+    - name: Создание файла зоны
       template:
         src: "/etc/ansible/roles/dns/templates/zone.example.j2"
         dest: "/var/named/{{ dns_zone }}.zone"
         owner: root
         group: named
         mode: 0640
-      notify: reload named
+      notify: restart named
       when: "'dns_servers' in group_names"
 
-    - name: Configure DNS clients
+    - name: Настройка DNS-клиентов
       nmcli:
-        conn_name: "System eth0"
+        conn_name: "enp0s3"
         dns4: "{{ dns_server }}"
         dns4_search: "{{ dns_zone }}"
         state: present
@@ -49,7 +49,12 @@
       systemd:
         name: named
         state: restarted
-
+        
+    - name: enable named
+      systemd:
+        name: named
+        state: enabled
+        
     - name: restart network
       systemd:
         name: NetworkManager

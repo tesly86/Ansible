@@ -1,5 +1,5 @@
 ---
-- name: Configure and deploy NTP server and clients
+- name: Настройка NTP-сервера и клиентов
   hosts: all
   become: yes
   vars:
@@ -7,15 +7,16 @@
       - "0.ru.pool.ntp.org"
       - "1.ru.pool.ntp.org"
       - "2.ru.pool.ntp.org"
+    ntp_server_ip: "192.168.1.3"
 
   tasks:
-    - name: Install chrony package
+    - name: Установка пакетов chrony
       dnf:
         name: chrony
         state: present
       when: "'ntp_servers' in group_names"
 
-    - name: Configure chrony server
+    - name: Настройка chrony-сервера
       template:
         src: "/etc/ansible/roles/ntp/templates/ntp.conf.j2"
         dest: "/etc/chrony.conf"
@@ -25,7 +26,7 @@
       notify: restart chronyd
       when: "'ntp_servers' in group_names"
 
-    - name: Configure NTP clients
+    - name: Настройка NTP-клиентов
       template:
         src: "/etc/ansible/roles/ntp/templates/ntp-client.conf.j2"
         dest: "/etc/chrony.conf"
