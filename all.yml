@@ -1,26 +1,11 @@
 ---
-# Общие переменные для всех хостов
+# Общие настройки
 ansible_user: sshuser
 ansible_python_interpreter: /usr/bin/python3
 
-# Настройки времени
-timezone: Europe/Moscow
-
-# Настройки сети
+# DNS настройки
 dns_domain: beloshenko.domain
-internal_network: 192.168.1.0/28
 dns_server: 192.168.1.2
+
+# NTP настройки
 ntp_server: 192.168.1.3
-
-# Дополнительные переменные для DNS
-upstream_dns_servers:
-  - "8.8.8.8"
-  - "8.8.4.4"
-
-# Дополнительные переменные для NTP
-ntp_server_1: "0.ru.pool.ntp.org"
-ntp_server_2: "1.ru.pool.ntp.org"
-ntp_server_3: "2.ru.pool.ntp.org"
-
-# Настройки безопасности
-selinux_state: enforcing

@@ -1,6 +1,6 @@
 ---
-- name: Configure and deploy NTP server
-  hosts: ntp_servers
+- name: Configure and deploy NTP server and clients
+  hosts: all
   become: yes
   vars:
     ntp_servers:
@@ -13,21 +13,27 @@
       dnf:
         name: chrony
         state: present
+      when: "'ntp_servers' in group_names"
 
-    - name: Configure chrony
+    - name: Configure chrony server
       template:
-        src: "roles/ntp/templates/ntp.conf.j2"
+        src: "/etc/ansible/roles/ntp/templates/ntp.conf.j2"
         dest: "/etc/chrony.conf"
         owner: root
         group: root
         mode: 0644
       notify: restart chronyd
+      when: "'ntp_servers' in group_names"
 
-    - name: Enable and start chronyd service
-      systemd:
-        name: chronyd
-        state: started
-        enabled: yes
+    - name: Configure NTP clients
+      template:
+        src: "/etc/ansible/roles/ntp/templates/ntp-client.conf.j2"
+        dest: "/etc/chrony.conf"
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart chronyd
+      when: "'ntp_servers' not in group_names"
 
   handlers:
     - name: restart chronyd
