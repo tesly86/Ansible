@@ -1,0 +1,36 @@
+---
+- name: Configure and deploy NTP server
+  hosts: ntp_servers
+  become: yes
+  vars:
+    ntp_servers:
+      - "0.ru.pool.ntp.org"
+      - "1.ru.pool.ntp.org"
+      - "2.ru.pool.ntp.org"
+
+  tasks:
+    - name: Install chrony package
+      dnf:
+        name: chrony
+        state: present
+
+    - name: Configure chrony
+      template:
+        src: "roles/ntp/templates/ntp.conf.j2"
+        dest: "/etc/chrony.conf"
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart chronyd
+
+    - name: Enable and start chronyd service
+      systemd:
+        name: chronyd
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: restart chronyd
+      systemd:
+        name: chronyd
+        state: restarted
